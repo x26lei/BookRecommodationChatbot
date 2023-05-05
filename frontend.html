@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Chatbot</title>
+	<link rel="stylesheet" href="https://cdn.staticfile.org/twitter-bootstrap/3.3.7/css/bootstrap.min.css">
+	<style>
+		.chat-window {
+			height: 400px;
+			overflow-y: scroll;
+			padding: 10px;
+			border: 1px solid #ccc;
+		}
+	</style>
+</head>
+<body>
+	<div class="container">
+		<h1 class="my-4 text-center">Chatbot</h1>
+		<div class="row">
+			<div class="col-md-8 mx-auto">
+				<div class="chat-window"></div>
+				<form id="chat-form">
+					<div class="form-group">
+						<label for="user-input">你的消息</label>
+						<input type="text" class="form-control" id="user-input">
+					</div>
+					<button type="submit" class="btn btn-primary" id="send-button">发送</button>
+				</form>
+			</div>
+		</div>
+	</div>
+
+	<script src="https://cdn.staticfile.org/jquery/2.1.1/jquery.min.js"></script>
+	<script src="https://cdn.staticfile.org/twitter-bootstrap/3.3.7/js/bootstrap.min.js"></script>
+	<script>
+		$(function() {
+			const chatWindow = $('.chat-window');
+			const userInput = $('#user-input');
+			const sendButton = $('#send-button');
+			const chatForm = $('#chat-form');
+
+			chatForm.submit(function(event) {
+				event.preventDefault();
+				const text = userInput.val().trim();
+
+				if (text === '') {
+					return;
+				}
+
+				const userMessage = $('<div class="text-right"><small class="text-muted">我:</small> ' + text + '</div>');
+				chatWindow.append(userMessage);
+				chatWindow.scrollTop(chatWindow[0].scrollHeight);
+
+				$.ajax({
+					url: 'http://127.0.0.1:5000/',
+					method: 'POST',
+					contentType: 'application/x-www-form-urlencoded',
+					dataType: 'json',
+					data: {text: text},
+					success: function(response) {
+						const botMessage = $('<div><small class="text-muted">Chatbot:</small> ' + response.text + '</div>');
+						chatWindow.append(botMessage);
+						chatWindow.scrollTop(chatWindow[0].scrollHeight);
+					},
+					error: function(xhr, status, error) {
+						console.error(xhr, status, error);
+					}
+				});
+
+				userInput.val('');
+			});
+		});
+	</script>
+</body>
+</html>
